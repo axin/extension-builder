@@ -1,5 +1,66 @@
-// var Async = require('async');
-// var Fs = require('fs');
-// var Path = require('path');
-// var CommonUtils = require('../lib/common-utils');
+var exec = require('child_process').exec;
+var Path = require('path');
+var CommonUtils = require('../lib/common-utils');
 
+exports.copyDirectoryContents = copyDirectoryContents;
+
+var PsScriptDirectory = Path.resolve(__filename, '../../ps');
+
+function copyDirectoryContents(source, destination, callback) {
+    var copyDirContentsScriptFullName = Path.join(PsScriptDirectory, 'copy-directory-contents.ps1');
+
+    executePowershellScript(copyDirContentsScriptFullName, [source, destination], callback);
+}
+
+function executePowershellScript(scriptFileName, parameters, callback) {
+    var error = null;
+
+    error = checkScriptFileName(scriptFileName);
+    if (error) {
+        callback(error);
+    }
+
+    error = checkParameters(parameters);
+    if (error) {
+        callback(error);
+    }
+
+    var commandString = 'powershell -ExecutionPolicy RemoteSigned -File ' +
+                        '"' + scriptFileName + '" ';
+
+    var i;
+    var len;
+    for (i = 0, len = parameters.length; i < len; i++) {
+        commandString += '"' + parameters[i]+ '" ';
+    }
+
+    var childProcess = exec(commandString, function (err, stdout, stderr) {
+        if (err) {
+            var errorMessage = 'Error while executing Powershell script: ' + stderr;
+            callback(errorMessage);
+        } else {
+            callback(null, stdout);
+        }
+    });
+    childProcess.stdin.end();
+}
+
+function checkScriptFileName(scriptFileName) {
+    if (!CommonUtils.isNotEmptyString(scriptFileName)) {
+        return 'scriptFileName should be not empty string';
+    }
+
+    if (!Path.existsSync(scriptFileName)) {
+        return 'scriptFileName does not exist';
+    }
+
+    return null;
+}
+
+function checkParameters(parameters) {
+    if (!Array.isArray(parameters)) {
+        return 'Parameters should be an array';
+    }
+
+    return null;
+}

@@ -1,4 +1,4 @@
-# Copies content of <source> to <destination>
+# Copies contents of <source> to <destination>
 
 param ([string]$source, [string]$destination)
 
