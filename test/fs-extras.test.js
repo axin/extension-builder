@@ -11,7 +11,7 @@ var expect = Chai.expect;
 describe('FsExtras', function () {
     var bhoTemplateDir = Path.resolve(__filename, '../../templates/bho');
 
-    describe('copyDirectoryContents()', function () {
+    describe('.copyDirectoryContents()', function () {
         it('Should copy directory contents', function (done) {
             var tempDir = Path.join(__filename, '../temp');
             var templateFile = Path.join(tempDir, './template.json');
@@ -42,22 +42,74 @@ describe('FsExtras', function () {
         });
     });
 
-    describe('getListOfFiles()', function () {
+    describe('.getListOfChilditems()', function () {
         it('Should return list of files as array', function (done) {
-            FsExtras.getListOfFiles(bhoTemplateDir, function (err, result) {
+            FsExtras.getListOfChilditems(bhoTemplateDir, 'files', function (err, result) {
                 expect(err).to.be.not.ok;
                 expect(result).to.be.instanceof(Array);
                 done();
             });
         });
 
-        it('Should return error, if directory does not exist', function (done) {
+        it('Should return list of directories as array', function (done) {
+            FsExtras.getListOfChilditems(bhoTemplateDir, 'directories', function (err, result) {
+                expect(err).to.be.not.ok;
+                expect(result).to.be.instanceof(Array);
+                done();
+            });
+        });
+
+        it('Should return error if directory does not exist', function (done) {
             var nonexistentDir = Path.join(__filename, '../nonexistent-dir');
 
-            FsExtras.getListOfFiles(nonexistentDir, function (err, result) {
+            FsExtras.getListOfChilditems(nonexistentDir, 'files', function (err, result) {
                 expect(err).to.be.ok;
                 expect(result).to.be.not.ok;
                 done();
+            });
+        });
+
+        it('Should return error if wrong childitem type has been passed', function (done) {
+            FsExtras.getListOfChilditems(bhoTemplateDir, 'wrongType', function (err, result) {
+                expect(err).to.be.ok;
+                expect(result).to.be.not.ok;
+                done();
+            });
+        });
+    });
+
+    describe('.makeSubstitutionsInChilditemNames()', function () {
+        it('Should replace {{{extensionName}}} with "SampleExtension" in file names', function (done) {
+            var testFilesDirectory = Path.join(__filename, '../test-files');
+
+            Async.waterfall([
+                function (callback) {
+                    FsExtras.getListOfChilditems(testFilesDirectory, 'files', callback);
+                },
+
+                function (items, callback) {
+                    FsExtras.makeSubstitutionsInChilditemNames('{{{extensionName}}}', 'SampleExtension',
+                        items, callback);
+                }
+            ],
+
+            function (err, result) {
+                expect(err).to.be.not.ok;
+
+                Async.waterfall([
+                    function (callback) {
+                        FsExtras.getListOfChilditems(testFilesDirectory, 'files', callback);
+                    },
+
+                    function (items, callback) {
+                        FsExtras.makeSubstitutionsInChilditemNames('SampleExtension', '{{{extensionName}}}',
+                            items, callback);
+                    }
+                ],
+
+                function (err, result) {
+                    done();
+                });
             });
         });
     });

@@ -1,10 +1,12 @@
 var exec = require('child_process').exec;
+var Fs = require('fs');
 var Path = require('path');
 var Async = require('async');
 var CommonUtils = require('../lib/common-utils');
 
 exports.copyDirectoryContents = copyDirectoryContents;
-exports.getListOfFiles = getListOfFiles;
+exports.getListOfChilditems = getListOfChilditems;
+exports.makeSubstitutionsInChilditemNames = makeSubstitutionsInChilditemNames;
 
 var PsScriptDirectory = Path.resolve(__filename, '../../ps');
 
@@ -14,21 +16,21 @@ function copyDirectoryContents(source, destination, callback) {
     executePowershellScript(copyDirContentsScriptFullName, [source, destination], callback);
 }
 
-function getListOfFiles(directory, callback) {
-    var getListOfFilesScriptFullName = Path.join(PsScriptDirectory, 'get-list-of-files.ps1');
+function getListOfChilditems(directory, childitemType, callback) {
+    var getListOfChilditemsScriptFullName = Path.join(PsScriptDirectory, 'get-list-of-childitems.ps1');
 
     Async.waterfall([
         function (done) {
-            executePowershellScript(getListOfFilesScriptFullName, [directory], done);
+            executePowershellScript(getListOfChilditemsScriptFullName, [directory, childitemType], done);
         },
 
         function (stdout, done) {
             try {
                 var list = JSON.parse(stdout);
-                done(null, list);
             } catch (e) {
-                done('Error while parsing file list: ' + e.message);
+                done('Error while parsing JSON: ' + e.message);
             }
+            done(null, list);
         }
     ],
 
@@ -41,17 +43,53 @@ function getListOfFiles(directory, callback) {
     });
 }
 
+function makeSubstitutionsInChilditemNames(pattern, substitution, childitemNames, callback) {
+    var items = CommonUtils.cloneObject(childitemNames);
+    sortArrayOfStringsByLengthInDescendingOrder(items);
+
+    // Do not replace with forEach!!!
+    Async.forEachSeries(items, function (item, done) {
+        makeSubstitutionInChilditemName(pattern, substitution, item, done);
+    }, callback);
+}
+
+function sortArrayOfStringsByLengthInDescendingOrder(arr) {
+    var len = arr.length;
+
+    for (var i = 0; i < len; i++) {
+        for (var j = len - 1; j > i; j--) {
+            if (arr[j].length > arr[j - 1].length) {
+                var tmp = arr[j - 1];
+                arr[j - 1] = arr[j];
+                arr[j] = tmp;
+            }
+        }
+    }
+}
+
+function makeSubstitutionInChilditemName(pattern, substitution, childitemName, callback) {
+    var dirName = Path.dirname(childitemName);
+    var baseName = Path.basename(childitemName);
+
+    var newBaseName = baseName.replace(pattern, substitution);
+    var newName = Path.join(dirName, newBaseName);
+
+    Fs.rename(childitemName, newName, callback);
+}
+
 function executePowershellScript(scriptFileName, parameters, callback) {
     var error = null;
 
     error = checkScriptFileName(scriptFileName);
     if (error) {
         callback(error);
+        return;
     }
 
-    error = checkParameters(parameters);
+    error = checkScriptParameters(parameters);
     if (error) {
         callback(error);
+        return;
     }
 
     var commandString = 'powershell -ExecutionPolicy RemoteSigned -File ' +
@@ -86,7 +124,7 @@ function checkScriptFileName(scriptFileName) {
     return null;
 }
 
-function checkParameters(parameters) {
+function checkScriptParameters(parameters) {
     if (!Array.isArray(parameters)) {
         return 'Parameters should be an array';
     }
