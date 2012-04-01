@@ -2,9 +2,20 @@
 
 param ([string]$directory)
 
+function exitWithError {
+    param ($message)
+
+    Write-Error $message
+    exit 1
+}
+
 function checkArguments {
     if ($directory -Eq "") {
         $directory = "."
+    }
+
+    if (-not (Test-Path $directory)) {
+        exitWithError("Directory does not exist")
     }
 }
 
