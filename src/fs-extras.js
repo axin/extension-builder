@@ -8,16 +8,16 @@ exports.copyDirectoryContents = copyDirectoryContents;
 exports.getListOfChilditems = getListOfChilditems;
 exports.makeSubstitutionsInChilditemNames = makeSubstitutionsInChilditemNames;
 
-var PsScriptDirectory = Path.resolve(__filename, '../../ps');
+var PsScriptsDirectory = Path.resolve(__filename, '../../ps');
 
 function copyDirectoryContents(source, destination, callback) {
-    var copyDirContentsScriptFullName = Path.join(PsScriptDirectory, 'copy-directory-contents.ps1');
+    var copyDirContentsScriptFullName = Path.join(PsScriptsDirectory, 'copy-directory-contents.ps1');
 
     executePowershellScript(copyDirContentsScriptFullName, [source, destination], callback);
 }
 
 function getListOfChilditems(directory, callback) {
-    var getListOfChilditemsScriptFullName = Path.join(PsScriptDirectory, 'get-list-of-childitems.ps1');
+    var getListOfChilditemsScriptFullName = Path.join(PsScriptsDirectory, 'get-list-of-childitems.ps1');
 
     Async.waterfall([
         function (done) {

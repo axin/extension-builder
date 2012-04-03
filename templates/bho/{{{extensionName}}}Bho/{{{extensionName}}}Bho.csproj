@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>{{snkFile}}</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>{{{snkFile}}}</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -47,12 +47,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="{{extensionName}}Bho.cs" />
+    <Compile Include="{{{extensionName}}}Bho.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="{{snkFile}}" />
+    <None Include="{{{snkFile}}}" />
   </ItemGroup>
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

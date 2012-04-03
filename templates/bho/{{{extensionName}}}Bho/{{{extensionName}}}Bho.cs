@@ -4,12 +4,12 @@ using Microsoft.Win32;
 using SHDocVw;
 using mshtml;
 
-namespace {{extensionName}}
+namespace {{{extensionName}}}
 {
     [ComVisible(true),
     ClassInterface(ClassInterfaceType.None),
-    Guid("{{bhoClassGuid}}")]
-    public class {{extensionName}}Bho : IObjectWithSite {
+    Guid("{{{bhoClassGuid}}}")]
+    public class {{{extensionName}}}Bho : IObjectWithSite {
         public static readonly Guid IID_IWebBrowserApp = new Guid("{0002DF05-0000-0000-C000-000000000046}");
         public static readonly Guid IID_IUnknown = new Guid("{00000000-0000-0000-C000-000000000046}");
         WebBrowserClass explorer;
