@@ -43,34 +43,18 @@ describe('FsExtras', function () {
     });
 
     describe('.getListOfChilditems()', function () {
-        it('Should return list of files as array', function (done) {
-            FsExtras.getListOfChilditems(bhoTemplateDir, 'files', function (err, result) {
+        it('Should return list of files and subdirectories in given directory as array', function (done) {
+            FsExtras.getListOfChilditems(bhoTemplateDir, function (err, result) {
                 expect(err).to.be.not.ok;
                 expect(result).to.be.instanceof(Array);
                 done();
             });
         });
 
-        it('Should return list of directories as array', function (done) {
-            FsExtras.getListOfChilditems(bhoTemplateDir, 'directories', function (err, result) {
-                expect(err).to.be.not.ok;
-                expect(result).to.be.instanceof(Array);
-                done();
-            });
-        });
-
-        it('Should return error if directory does not exist', function (done) {
+        it('Should return error if given directory does not exist', function (done) {
             var nonexistentDir = Path.join(__filename, '../nonexistent-dir');
 
-            FsExtras.getListOfChilditems(nonexistentDir, 'files', function (err, result) {
-                expect(err).to.be.ok;
-                expect(result).to.be.not.ok;
-                done();
-            });
-        });
-
-        it('Should return error if wrong childitem type has been passed', function (done) {
-            FsExtras.getListOfChilditems(bhoTemplateDir, 'wrongType', function (err, result) {
+            FsExtras.getListOfChilditems(nonexistentDir, function (err, result) {
                 expect(err).to.be.ok;
                 expect(result).to.be.not.ok;
                 done();
@@ -79,12 +63,12 @@ describe('FsExtras', function () {
     });
 
     describe('.makeSubstitutionsInChilditemNames()', function () {
-        it('Should replace {{{extensionName}}} with "SampleExtension" in file names', function (done) {
+        it('Should replace {{{extensionName}}} with "SampleExtension" in file and directory names', function (done) {
             var testFilesDirectory = Path.join(__filename, '../test-files');
 
             Async.waterfall([
                 function (callback) {
-                    FsExtras.getListOfChilditems(testFilesDirectory, 'files', callback);
+                    FsExtras.getListOfChilditems(testFilesDirectory, callback);
                 },
 
                 function (items, callback) {
@@ -98,7 +82,7 @@ describe('FsExtras', function () {
 
                 Async.waterfall([
                     function (callback) {
-                        FsExtras.getListOfChilditems(testFilesDirectory, 'files', callback);
+                        FsExtras.getListOfChilditems(testFilesDirectory, callback);
                     },
 
                     function (items, callback) {

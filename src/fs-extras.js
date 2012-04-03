@@ -16,12 +16,12 @@ function copyDirectoryContents(source, destination, callback) {
     executePowershellScript(copyDirContentsScriptFullName, [source, destination], callback);
 }
 
-function getListOfChilditems(directory, childitemType, callback) {
+function getListOfChilditems(directory, callback) {
     var getListOfChilditemsScriptFullName = Path.join(PsScriptDirectory, 'get-list-of-childitems.ps1');
 
     Async.waterfall([
         function (done) {
-            executePowershellScript(getListOfChilditemsScriptFullName, [directory, childitemType], done);
+            executePowershellScript(getListOfChilditemsScriptFullName, [directory], done);
         },
 
         function (stdout, done) {
