@@ -6,6 +6,7 @@ var CommonUtils = require('../lib/common-utils');
 
 exports.copyDirectoryContents = copyDirectoryContents;
 exports.getListOfChilditems = getListOfChilditems;
+exports.getListOfFiles = getListOfFiles;
 exports.makeSubstitutionsInChilditemNames = makeSubstitutionsInChilditemNames;
 
 var PsScriptsDirectory = Path.resolve(__filename, '../../ps');
@@ -16,9 +17,9 @@ function copyDirectoryContents(source, destination, callback) {
     executePowershellScript(copyDirContentsScriptFullName, [source, destination], callback);
 }
 
-function getListOfChilditems(directory, callback) {
-    var getListOfChilditemsScriptFullName = Path.join(PsScriptsDirectory, 'get-list-of-childitems.ps1');
+var getListOfChilditemsScriptFullName = Path.join(PsScriptsDirectory, 'get-list-of-childitems.ps1');
 
+function getListOfChilditems(directory, callback) {
     Async.waterfall([
         function (done) {
             executePowershellScript(getListOfChilditemsScriptFullName, [directory], done);
@@ -41,6 +42,31 @@ function getListOfChilditems(directory, callback) {
             callback(null, result);
         }
     });
+}
+
+function getListOfFiles(directory, callback) {
+    Async.waterfall([
+        function (done) {
+            executePowershellScript(getListOfChilditemsScriptFullName, [directory, 'true'], done);
+        },
+
+        function (stdout, done) {
+            try {
+                var list = JSON.parse(stdout);
+            } catch (e) {
+                done('Error while parsing JSON: ' + e.message);
+            }
+            done(null, list);
+        }
+    ],
+
+        function (err, result) {
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, result);
+            }
+        });
 }
 
 function makeSubstitutionsInChilditemNames(pattern, substitution, childitemNames, callback) {

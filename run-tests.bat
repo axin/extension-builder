@@ -1,2 +1,2 @@
 @echo off
-cmd /K .\node_modules\.bin\mocha --reporter list --timeout 5000
+cmd /K .\node_modules\.bin\mocha --reporter list --timeout 10000

@@ -1,8 +1,10 @@
 var Path = require('path');
 var Async = require('async');
 var CommonUtils = require('../lib/common-utils');
+var FsExtras = require('./fs-extras');
+var MustacheExtras = require('./mustache-extras');
 
-exports.createBho = generateBhoSource;
+exports.generateBhoSource = generateBhoSource;
 
 var bhoTemplateDirectory = Path.resolve(__filename, '../../templates/bho');
 
@@ -15,17 +17,35 @@ function generateBhoSource(extensionManifest, outputDirectory, templateData, cal
 
     var extensionName = extensionManifest['extension-name'];
 
-//    EfUtils.executePowershellScript(copyDirectoryContentScriptFullName,
-//        [bhoTemplateDirectory, outputDirectory], function (stdout) {
-//            EfUtils.executePowershellScript(makeSubstitutionsInFileAndDirectoryNamesScriptFullName,
-//                ['{{extensionName}}', extensionName, outputDirectory], function (stdout) {
-//                    EfUtils.executePowershellScript(getFileListScriptFullName,
-//                        [outputDirectory], function (stdout) {
-//                            var files = JSON.parse(stdout);
-//                            // TODO: write mustache-template-file-parser
-//                        });
-//                });
-//        });
+    Async.waterfall([
+        function (done) {
+            FsExtras.copyDirectoryContents(bhoTemplateDirectory, outputDirectory, done);
+        },
+
+        function (stdout, done) {
+            FsExtras.getListOfChilditems(outputDirectory, done);
+        },
+
+        function (childitems, done) {
+            FsExtras.makeSubstitutionsInChilditemNames('{{{extensionName}}}', extensionName, childitems, done);
+        },
+
+        function (done) {
+            FsExtras.getListOfFiles(outputDirectory, done)
+        },
+
+        function (files, done) {
+            MustacheExtras.renderFiles(files, templateData, done);
+        }
+    ],
+
+    function (err, result) {
+        if (err) {
+            return callback(err);
+        } else {
+            return callback(null);
+        }
+    });
 
     function checkParameters() {
         var error = null;

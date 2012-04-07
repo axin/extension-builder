@@ -1,6 +1,6 @@
 # Writes to standard output list of files and subdirectories in given <directory>.
 
-param ([string]$directory)
+param ([string]$directory, [string]$onlyFiles)
 
 function exitWithError {
     param ($message)
@@ -28,7 +28,13 @@ function getListOfChilditems {
         $result = '[]'
     } else {
         $items | foreach {
-            $result += ('"' + ($_.FullName -Replace '\\', '\\') + '"' + ', ')
+            if ($onlyFiles -Eq "true") {
+                if (-Not $_.PSIsContainer) {
+                    $result += ('"' + ($_.FullName -Replace '\\', '\\') + '"' + ', ')
+                }
+            } else {
+                $result += ('"' + ($_.FullName -Replace '\\', '\\') + '"' + ', ')
+            }
         }
 
         $result = $result -replace ', $', ']'
