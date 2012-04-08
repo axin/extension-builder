@@ -12,7 +12,7 @@ describe('BhoGenerator', function () {
         it('Should generate BHO source code', function (done) {
             var tempDir = Path.join(__filename, '../temp2');
 
-            BhoGenerator.generateBhoSource({ 'extension-name': 'Test' }, tempDir, { extensionName: 'Test' }, function () {
+            BhoGenerator.generateBhoSource(tempDir, { extensionName: 'Test' }, function () {
                 rimraf(tempDir, function () {
                     done();
                 });

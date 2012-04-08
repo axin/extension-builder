@@ -8,14 +8,12 @@ exports.generateBhoSource = generateBhoSource;
 
 var bhoTemplateDirectory = Path.resolve(__filename, '../../templates/bho');
 
-function generateBhoSource(extensionManifest, outputDirectory, templateData, callback) {
+function generateBhoSource(outputDirectory, templateData, callback) {
     var error = checkParameters();
     if (error) {
         callback(error);
         return;
     }
-
-    var extensionName = extensionManifest['extension-name'];
 
     Async.waterfall([
         function (done) {
@@ -27,7 +25,8 @@ function generateBhoSource(extensionManifest, outputDirectory, templateData, cal
         },
 
         function (childitems, done) {
-            FsExtras.makeSubstitutionsInChilditemNames('{{{extensionName}}}', extensionName, childitems, done);
+            FsExtras.makeSubstitutionsInChilditemNames('{{{extensionName}}}', templateData.extensionName,
+                childitems, done);
         },
 
         function (done) {
@@ -50,11 +49,6 @@ function generateBhoSource(extensionManifest, outputDirectory, templateData, cal
     function checkParameters() {
         var error = null;
 
-        error = checkExtensionManifest(extensionManifest);
-        if (error) {
-            return error;
-        }
-
         error = checkOutputDirectory(outputDirectory);
         if (error) {
             return error;
@@ -71,16 +65,6 @@ function generateBhoSource(extensionManifest, outputDirectory, templateData, cal
         }
 
         return error;
-    }
-
-    function checkExtensionManifest(extensionManifest) {
-        if (!CommonUtils.isNotNullObject(extensionManifest)) {
-            return 'extensionManifest should be not null object';
-        }
-
-        // TODO: check for extensionManifest['extinsion-name']
-
-        return null;
     }
 
     function checkOutputDirectory(outputDirectory) {
@@ -111,4 +95,3 @@ function generateBhoSource(extensionManifest, outputDirectory, templateData, cal
         return null;
     }
 }
-

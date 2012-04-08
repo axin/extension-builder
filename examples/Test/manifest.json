@@ -1,0 +1,11 @@
+{
+    "name": "TestExtension",
+    "version": "1.0",
+
+    "content-scripts": [
+        "content1.js",
+        "content2.js"
+    ],
+
+    "output-dir": "./output"
+}
