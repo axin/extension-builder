@@ -1,6 +1,8 @@
 {
     "name": "TestExtension",
     "version": "1.0",
+    "author": "Alexey Sazikin",
+    "description": "Sample Application",
 
     "content-scripts": [
         "content1.js",
