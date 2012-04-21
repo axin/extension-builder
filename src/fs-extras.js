@@ -4,12 +4,31 @@ var Path = require('path');
 var Async = require('async');
 var CommonUtils = require('../lib/common-utils');
 
+exports.generateSnkFile = generateSnkFile;
+exports.generateGuid = generateGuid;
 exports.copyDirectoryContents = copyDirectoryContents;
 exports.getListOfChilditems = getListOfChilditems;
 exports.getListOfFiles = getListOfFiles;
 exports.makeSubstitutionsInChilditemNames = makeSubstitutionsInChilditemNames;
 
 var PsScriptsDirectory = Path.resolve(__filename, '../../ps');
+
+function generateSnkFile(monoBinDir, snkFileName, callback) {
+    var generateSnkFileScriptFullName = Path.join(PsScriptsDirectory, 'generate-snk-file.ps1');
+
+    executePowershellScript(generateSnkFileScriptFullName, [monoBinDir, snkFileName], callback);
+}
+
+function generateGuid(callback) {
+    var generateGuidScriptFullName = Path.join(PsScriptsDirectory, 'generate-guid.ps1');
+
+    executePowershellScript(generateGuidScriptFullName, [], function (err, result) {
+        if (!err) {
+            // Remove newline and carriage return symbols
+            callback(err, result.slice(0, -2));
+        }
+    });
+}
 
 function copyDirectoryContents(source, destination, callback) {
     var copyDirContentsScriptFullName = Path.join(PsScriptsDirectory, 'copy-directory-contents.ps1');

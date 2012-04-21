@@ -3,6 +3,7 @@ var Path = require('path');
 var Async = require('async');
 var Fs = require('fs');
 var rimraf = require('rimraf');
+var FsExtras = require('./fs-extras');
 var BhoGenerator = require('./bho-generator');
 var JsonFileParser = require('./json-file-parser');
 
@@ -26,7 +27,22 @@ function exitWithError(errorMessage) {
     process.exit(1);
 }
 
+var settings;
+var monoBinDirectory;
+
 Async.waterfall([
+    function (done) {
+        var settingsFile = Path.resolve(__filename, "../../settings.json");
+
+        JsonFileParser.parseJsonFile(settingsFile, done);
+    },
+
+    function (parsedSettings, done) {
+        settings = parsedSettings;
+        monoBinDirectory = settings["mono-bin-directory"];
+        done(null);
+    },
+
     function (done) {
         Path.exists(manifestFile, function (manifestExists) {
             if (!manifestExists) {
@@ -50,7 +66,62 @@ Async.waterfall([
         templateData.extensionDescription = parsedManifest['description'] || '';
         templateData.currentYear = (new Date()).getFullYear();
 
-        done(null, templateData, parsedManifest);
+        Async.waterfall([
+            function (wfDone) {
+                var keysFile = Path.join(extensionDir, './keys.json');
+
+                Path.exists(keysFile, function (exists) {
+                    wfDone(null, exists);
+                });
+            },
+
+            function (exists, wfDone) {
+                var pathToKeysFile = Path.join(extensionDir, './keys.json');
+
+                if (exists) {
+                    JsonFileParser.parseJsonFile(pathToKeysFile, function (err, result) {
+                        templateData.bhoClassGuid = result['bho-clsid'];
+                        templateData.assemblyGuid = result['bho-assembly-guid'];
+                        templateData.snkFile = Path.resolve(extensionDir, result['snk-file']);
+
+                        FsExtras.generateGuid(function (err, res) {
+                            templateData.projectGuid = res;
+                            wfDone(null);
+                        });
+                    });
+                } else {
+                    Async.map([null, null, null],
+                        function (arg, callback) {
+                            FsExtras.generateGuid(callback);
+                        },
+
+                        function (err, results) {
+                            var guids = results;
+                            var snkFileName = templateData.extensionAuthor + '.snk';
+                            var pathToSnkFile = Path.join(extensionDir, './' + snkFileName);
+
+                            FsExtras.generateSnkFile(monoBinDirectory, pathToSnkFile, function (err, result) {
+                                var KeysJsonTemplate = '{"bho-clsid":"{{{bhoClassGuid}}}","bho-assembly-guid":"{{{assemblyGuid}}}","snk-file":"{{{nskFile}}}"}';
+                                KeysJsonTemplate = KeysJsonTemplate.replace('{{{bhoClassGuid}}}', guids[0]);
+                                KeysJsonTemplate = KeysJsonTemplate.replace('{{{assemblyGuid}}}', guids[1]);
+                                KeysJsonTemplate = KeysJsonTemplate.replace('{{{nskFile}}}', './' + snkFileName);
+
+                                Fs.writeFile(pathToKeysFile, KeysJsonTemplate, 'utf-8', function () {
+                                    templateData.bhoClassGuid = guids[0];
+                                    templateData.assemblyGuid = guids[1];
+                                    templateData.projectGuid = guids[2];
+                                    templateData.snkFile = pathToSnkFile;
+                                    wfDone(null);
+                                });
+                            });
+                        });
+                }
+            }
+        ],
+
+        function (err, result) {
+            done(null, templateData, parsedManifest);
+        });
     },
 
     function (templateData, parsedManifest, done) {
