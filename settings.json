@@ -1,3 +1,4 @@
 {
-    "mono-bin-directory": "C:\\Program Files\\Mono-2.10.8\\bin"
+    "win-sdk-location": "C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\bin",
+    "msbuild-location": "C:\\Windows\\Microsoft.NET\\Framework\\v4.0.30319"
 }

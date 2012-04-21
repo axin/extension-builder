@@ -28,7 +28,11 @@ function exitWithError(errorMessage) {
 }
 
 var settings;
-var monoBinDirectory;
+var winSdkLocation;
+var msbuildLocation;
+
+var outputDir;
+var bhoTemplateManifest;
 
 Async.waterfall([
     function (done) {
@@ -39,7 +43,8 @@ Async.waterfall([
 
     function (parsedSettings, done) {
         settings = parsedSettings;
-        monoBinDirectory = settings["mono-bin-directory"];
+        winSdkLocation = settings["win-sdk-location"];
+        msbuildLocation = settings["msbuild-location"];
         done(null);
     },
 
@@ -100,7 +105,7 @@ Async.waterfall([
                             var snkFileName = templateData.extensionAuthor + '.snk';
                             var pathToSnkFile = Path.join(extensionDir, './' + snkFileName);
 
-                            FsExtras.generateSnkFile(monoBinDirectory, pathToSnkFile, function (err, result) {
+                            FsExtras.generateSnkFile(winSdkLocation, pathToSnkFile, function (err, result) {
                                 var KeysJsonTemplate = '{"bho-clsid":"{{{bhoClassGuid}}}","bho-assembly-guid":"{{{assemblyGuid}}}","snk-file":"{{{nskFile}}}"}';
                                 KeysJsonTemplate = KeysJsonTemplate.replace('{{{bhoClassGuid}}}', guids[0]);
                                 KeysJsonTemplate = KeysJsonTemplate.replace('{{{assemblyGuid}}}', guids[1]);
@@ -125,11 +130,25 @@ Async.waterfall([
     },
 
     function (templateData, parsedManifest, done) {
-        var outputDir = Path.join(extensionDir, parsedManifest['output-dir'] || 'output');
+        outputDir = Path.join(extensionDir, parsedManifest['output-dir'] || 'output');
+        bhoTemplateManifest = Path.join(outputDir, './template.json');
 
         rimraf(outputDir, function () {
             Fs.mkdir(outputDir, function () {
                 BhoGenerator.generateBhoSource(outputDir, templateData, done);
+            });
+        });
+    },
+
+    function (done) {
+        JsonFileParser.parseJsonFile(bhoTemplateManifest, function (err, result) {
+            var projectFile = Path.join(outputDir, result['project-file']);
+
+            console.log(projectFile);
+
+            FsExtras.buildProject(msbuildLocation, projectFile, function (err) {
+                console.log(err);
+                done(null);
             });
         });
     }

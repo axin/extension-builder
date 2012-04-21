@@ -4,6 +4,7 @@ var Path = require('path');
 var Async = require('async');
 var CommonUtils = require('../lib/common-utils');
 
+exports.buildProject = buildProject;
 exports.generateSnkFile = generateSnkFile;
 exports.generateGuid = generateGuid;
 exports.copyDirectoryContents = copyDirectoryContents;
@@ -12,6 +13,12 @@ exports.getListOfFiles = getListOfFiles;
 exports.makeSubstitutionsInChilditemNames = makeSubstitutionsInChilditemNames;
 
 var PsScriptsDirectory = Path.resolve(__filename, '../../ps');
+
+function buildProject(msbuildLocation, projectFile, callback) {
+    var buildProjectScriptFullName = Path.join(PsScriptsDirectory, 'build-project.ps1');
+
+    executePowershellScript(buildProjectScriptFullName, [msbuildLocation, projectFile], callback);
+}
 
 function generateSnkFile(monoBinDir, snkFileName, callback) {
     var generateSnkFileScriptFullName = Path.join(PsScriptsDirectory, 'generate-snk-file.ps1');

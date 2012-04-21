@@ -1,4 +1,4 @@
-param ([string]$monoBinDir, [string]$snkFileName)
+param ([string]$winSdkLocation, [string]$snkFileName)
 
-Set-Location $monoBinDir
+Set-Location $winSdkLocation
 ./sn -k "$snkFileName"
