@@ -133,6 +133,12 @@ Async.waterfall([
         outputDir = Path.join(extensionDir, parsedManifest['output-dir'] || 'output');
         bhoTemplateManifest = Path.join(outputDir, './template.json');
 
+        if (parsedManifest['content-scripts']) {
+            templateData.contentScripts = parsedManifest['content-scripts'].map(function (scriptFile) {
+                return Path.join(extensionDir, scriptFile);
+            });
+        }
+
         rimraf(outputDir, function () {
             Fs.mkdir(outputDir, function () {
                 BhoGenerator.generateBhoSource(outputDir, templateData, done);
@@ -144,10 +150,7 @@ Async.waterfall([
         JsonFileParser.parseJsonFile(bhoTemplateManifest, function (err, result) {
             var projectFile = Path.join(outputDir, result['project-file']);
 
-            console.log(projectFile);
-
             FsExtras.buildProject(msbuildLocation, projectFile, function (err) {
-                console.log(err);
                 done(null);
             });
         });

@@ -1,0 +1,8 @@
+C:\Users\Alexey\Projects\extension-builder\examples\Test\output\TestExtensionBho\bin\TestExtensionBho.dll
+C:\Users\Alexey\Projects\extension-builder\examples\Test\output\TestExtensionBho\bin\TestExtensionBho.pdb
+C:\Users\Alexey\Projects\extension-builder\examples\Test\output\TestExtensionBho\bin\Interop.SHDocVw.dll
+C:\Users\Alexey\Projects\extension-builder\examples\Test\output\TestExtensionBho\obj\release\TestExtensionBho.csprojResolveAssemblyReference.cache
+C:\Users\Alexey\Projects\extension-builder\examples\Test\output\TestExtensionBho\obj\release\Interop.SHDocVw.dll
+C:\Users\Alexey\Projects\extension-builder\examples\Test\output\TestExtensionBho\obj\release\TestExtensionBho.csproj.ResolveComReference.cache
+C:\Users\Alexey\Projects\extension-builder\examples\Test\output\TestExtensionBho\obj\release\TestExtensionBho.dll
+C:\Users\Alexey\Projects\extension-builder\examples\Test\output\TestExtensionBho\obj\release\TestExtensionBho.pdb

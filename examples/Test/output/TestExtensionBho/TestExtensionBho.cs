@@ -6,12 +6,12 @@ using Microsoft.Win32;
 using SHDocVw;
 using mshtml;
 
-namespace {{{extensionName}}}
+namespace TestExtension
 {
     [ComVisible(true),
     ClassInterface(ClassInterfaceType.None),
-    Guid("{{{bhoClassGuid}}}")]
-    public class {{{extensionName}}}Bho : IObjectWithSite {
+    Guid("0a2ad83a-cb82-4312-9516-aa3540c03160")]
+    public class TestExtensionBho : IObjectWithSite {
         public static readonly Guid IID_IWebBrowserApp = new Guid("{0002DF05-0000-0000-C000-000000000046}");
         public static readonly Guid IID_IUnknown = new Guid("{00000000-0000-0000-C000-000000000046}");
         WebBrowserClass explorer;
@@ -66,9 +66,8 @@ namespace {{{extensionName}}}
             //inject Script
             List<string> jsFiles = new List<string>();
 
-            {{#contentScripts}}
-                jsFiles.Add(readFile(@"{{.}}"));
-            {{/contentScripts}}
+                jsFiles.Add(readFile(@"C:\Users\Alexey\Projects\extension-builder\examples\Test\content1.js"));
+                jsFiles.Add(readFile(@"C:\Users\Alexey\Projects\extension-builder\examples\Test\content2.js"));
 
             foreach (string jsFile in jsFiles) {
 //                htmlDoc.parentWindow.execScript("alert('" + jsFile + "')", "javascript");
