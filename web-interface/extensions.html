@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    <title>Extension-Builder - Extensions</title>
+
+    <script src="lib/jquery/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="lib/bootstrap/css/bootstrap-responsive.min.css" />
+    <script src="lib/bootstrap/js/bootstrap.min.js" defer></script>
+
+    <link rel="stylesheet" href="css/extensions.css" />
+
+    <script>
+        window.addEventListener('load', function () {
+            document.querySelector('#create-extension-button').addEventListener('click', function () {
+                var xhr = new XMLHttpRequest();
+
+                xhr.open('POST', 'http://localhost:8009/extensions/new', true);
+                xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xhr.setRequestHeader("Accept", "*/*");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4) {
+                        if(xhr.status == 200) {
+                            var response = xhr.responseText;
+
+                            window.location.replace(window.location.origin + '/editor.html?user=' +
+                                    getUerId() + '&extension=' + response);
+                        }
+                    }
+                };
+
+                xhr.send('{"name": "' + document.querySelector('#ext-name-input').value + '", "user": "' + getUerId() + '"}');
+            });
+
+            var xhr = new XMLHttpRequest();
+
+            xhr.open('GET', 'http://localhost:8009/extensions/{"user":"' + getUerId() + '"}', true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xhr.setRequestHeader("Accept", "*/*");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    if(xhr.status == 200) {
+                        var response = JSON.parse(xhr.responseText);
+
+                        for (var i = 0, len = response.length; i < len; i++) {
+                            var el = document.createElement('a');
+                            el.style.display = 'inline-block';
+                            el.style.width = '50%';
+                            el.innerText = response[i].name;
+
+                            document.querySelector('#links-container').appendChild(el);
+                        }
+                    }
+                }
+            };
+
+            xhr.send(null);
+
+        }, false);
+
+        function getUerId() {
+            return window.location.search.match(/\?user=(.*)/)[1];
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="span6 offset3 well" id="main-container">
+            <a class="btn btn-success" data-toggle="modal" href="#create-extension-settings">Создать новое расширение</a>
+            <div style="margin-top: 10px; margin-bottom: 10px;" id="links-container"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="create-extension-settings" style="display: none;">
+        <div class="modal-header">
+            <button class="close" data-dismiss="modal">x</button>
+            <h3>Введите название расширения</h3>
+        </div>
+        <div class="modal-body">
+            <input type="text" id="ext-name-input" />
+        </div>
+        <div class="modal-footer">
+            <a class="btn" data-toggle="modal" href="#create-extension-settings">Отмена</a>
+            <a class="btn btn-primary" id="create-extension-button">Создать</a>
+        </div>
+    </div>
+</body>
+
+</html>

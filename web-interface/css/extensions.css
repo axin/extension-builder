@@ -1,0 +1,9 @@
+#main-container {
+    position: absolute;
+    width: 400px;
+    height: 300px;
+    top: 45%;
+    left: 50%;
+    margin-top: -150px; /* negative number 1/2 height */
+    margin-left: -200px; /* negative number 1/2 width */
+}

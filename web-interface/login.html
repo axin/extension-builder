@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Extension-Builder - Log in</title>
+
+        <script src="lib/jquery/jquery.min.js"></script>
+
+        <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="lib/bootstrap/css/bootstrap-responsive.min.css" />
+        <script src="lib/bootstrap/js/bootstrap.min.js" defer></script>
+
+        <link rel="stylesheet" href="css/login.css" />
+
+        <script>
+            window.addEventListener('load', function () {
+                document.querySelector('#register-button').addEventListener('click', function (e) {
+                    var userName = document.querySelector('#registration-user-name').value;
+                    var userPassword = document.querySelector('#registration-password').value;
+                    var userPasswordConfirm = document.querySelector('#registration-confirm-password').value;
+                    var errorMessageDiv = document.querySelector('#error-message');
+
+                    errorMessageDiv.style.display = 'none';
+
+                    if (userPassword !== userPasswordConfirm) {
+                        errorMessageDiv.innerText = 'Пароли не совпадают!';
+                        errorMessageDiv.style.display = 'block';
+                    } else {
+                        var xhr = new XMLHttpRequest();
+
+                        xhr.open('POST', 'http://localhost:8009/users/new', true);
+                        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                        xhr.setRequestHeader("Accept", "*/*");
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState == 4) {
+                                if(xhr.status == 200) {
+                                    window.location.replace(window.location.origin + "/login.html?user=" + xhr.responseText);
+                                }
+                            }
+                        };
+
+                        xhr.send('{"login": "' + userName + '", "password": "' + userPassword + '"}');
+                    }
+
+                    e.stopPropagation();
+                    return false;
+                }, false);
+
+                document.querySelector('#log-in-button').addEventListener('click', function (e) {
+                    var userName = document.querySelector('#log-in-user-name').value;
+                    var userPassword = document.querySelector('#log-in-password').value;
+                    var errorMessageDiv = document.querySelector('#error-message');
+
+                    errorMessageDiv.style.display = 'none';
+
+                    var xhr = new XMLHttpRequest();
+
+                    xhr.open('GET', 'http://localhost:8009/users/{"login":"' + userName +
+                            '","password":"' + userPassword + '"}', true);
+                    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    xhr.setRequestHeader("Accept", "*/*");
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState == 4) {
+                            if(xhr.status == 200) {
+                                var response = JSON.parse(xhr.responseText);
+
+                                if (response.length === 0) {
+                                    errorMessageDiv.innerText = 'Не верное имя пользователя или пароль!';
+                                    errorMessageDiv.style.display = 'block';
+                                } else {
+                                    window.location.replace(window.location.origin + "/login.html?user=" + response[0]['_id']);
+                                }
+                            }
+                        }
+                    };
+
+                    xhr.send(null);
+
+                    e.stopPropagation();
+                    return false;
+                }, false);
+
+            }, false);
+        </script>
+    </head>
+
+    <body>
+        <div class="container-fluid" style="margin-top: 100px">
+            <div class="row">
+                <div class="span5 offset4">
+                    <div class="tabbable well">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a href="#log-in-tab" data-toggle="tab">Вход</a>
+                            </li>
+                            <li>
+                                <a href="#registration-tab" data-toggle="tab">Регистрация</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <form class="tab-pane active" id="log-in-tab">
+                                <label>Логин</label>
+                                <input type="text" id="log-in-user-name" class="width420" />
+                                <label>Пароль</label>
+                                <input type="password" id="log-in-password" class="width420" />
+                                <br />
+                                <a class="btn btn-primary btn-large" id="log-in-button">Войти</a>
+                            </form>
+                            <form class="tab-pane" id="registration-tab">
+                                <label>Логин</label>
+                                <input type="text" id="registration-user-name" class="width420" />
+                                <label>Пароль</label>
+                                <input type="password" id="registration-password" class="width420" />
+                                <label>Введите пароль еще раз</label>
+                                <input type="password" id="registration-confirm-password" class="width420" />
+                                <br />
+                                <a class="btn btn-primary btn-large" id="register-button">Зарегистрироваться</a>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-error" id="error-message" style="display: none;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
